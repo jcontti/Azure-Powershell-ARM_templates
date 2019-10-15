@@ -1,0 +1,1775 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sites_lab_myproject_name": {
+            "defaultValue": "lab-myproject",
+            "type": "String"
+        },
+        "sites_back_lab_myproject_name": {
+            "defaultValue": "back-lab-myproject",
+            "type": "String"
+        },
+        "serverfarms_apirest_name": {
+            "defaultValue": "apirest",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2016-09-01",
+            "name": "[parameters('serverfarms_apirest_name')]",
+            "location": "Central US",
+            "tags": {
+                "Technology": "Infrastructure"
+            },
+            "sku": {
+                "name": "S1",
+                "tier": "Standard",
+                "size": "S1",
+                "family": "S",
+                "capacity": 1
+            },
+            "kind": "app",
+            "properties": {
+                "name": "[parameters('serverfarms_apirest_name')]",
+                "perSiteScaling": false,
+                "reserved": false,
+                "targetWorkerCount": 0,
+                "targetWorkerSizeId": 0
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2016-08-01",
+            "name": "[parameters('sites_back_lab_myproject_name')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_apirest_name'))]"
+            ],
+            "tags": {
+                "Environment": "Production",
+                "Technology": "Backend"
+            },
+            "kind": "app",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "[concat(parameters('sites_back_lab_myproject_name'), '.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "[concat(parameters('sites_back_lab_myproject_name'), '.scm.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_apirest_name'))]",
+                "reserved": false,
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": true,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": true
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2016-08-01",
+            "name": "[parameters('sites_lab_myproject_name')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_apirest_name'))]"
+            ],
+            "tags": {
+                "Environment": "Production",
+                "Technology": "Frontend"
+            },
+            "kind": "app",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "[concat(parameters('sites_lab_myproject_name'), '.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "[concat(parameters('sites_lab_myproject_name'), '.scm.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_apirest_name'))]",
+                "reserved": false,
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": true,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/web')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "tags": {
+                "Environment": "Production",
+                "Technology": "Backend"
+            },
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php",
+                    "hostingstart.html"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "phpVersion": "5.6",
+                "pythonVersion": "",
+                "nodeVersion": "",
+                "linuxFxVersion": "",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "remoteDebuggingVersion": "VS2017",
+                "httpLoggingEnabled": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$back-lab-myproject",
+                "scmType": "VSTSRM",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": true,
+                "appCommandLine": "",
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": true,
+                        "virtualDirectories": null
+                    }
+                ],
+                "winAuthAdminState": 0,
+                "winAuthTenantState": 0,
+                "customAppPoolIdentityAdminState": false,
+                "customAppPoolIdentityTenantState": false,
+                "loadBalancing": "LeastRequests",
+                "routingRules": [],
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "vnetName": "",
+                "siteAuthEnabled": false,
+                "siteAuthSettings": {
+                    "enabled": null,
+                    "unauthenticatedClientAction": null,
+                    "tokenStoreEnabled": null,
+                    "allowedExternalRedirectUrls": null,
+                    "defaultProvider": null,
+                    "clientId": null,
+                    "clientSecret": null,
+                    "clientSecretCertificateThumbprint": null,
+                    "issuer": null,
+                    "allowedAudiences": null,
+                    "additionalLoginParams": null,
+                    "isAadAutoProvisioned": false,
+                    "googleClientId": null,
+                    "googleClientSecret": null,
+                    "googleOAuthScopes": null,
+                    "facebookAppId": null,
+                    "facebookAppSecret": null,
+                    "facebookOAuthScopes": null,
+                    "twitterConsumerKmyproject": null,
+                    "twitterConsumerSecret": null,
+                    "microsoftAccountClientId": null,
+                    "microsoftAccountClientSecret": null,
+                    "microsoftAccountOAuthScopes": null
+                },
+                "cors": {
+                    "allowedOrigins": [],
+                    "supportCredentials": false
+                },
+                "localMySqlEnabled": false,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "ftpsState": "AllAllowed",
+                "reservedInstanceCount": 0,
+                "fileChangeAuditEnabled": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_lab_myproject_name'), '/web')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lab_myproject_name'))]"
+            ],
+            "tags": {
+                "Environment": "Production",
+                "Technology": "Frontend"
+            },
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php",
+                    "hostingstart.html"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "phpVersion": "5.6",
+                "pythonVersion": "",
+                "nodeVersion": "8.5.0",
+                "linuxFxVersion": "",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "remoteDebuggingVersion": "VS2017",
+                "httpLoggingEnabled": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$lab-myproject",
+                "scmType": "None",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": true,
+                "appCommandLine": "",
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": true,
+                        "virtualDirectories": null
+                    }
+                ],
+                "winAuthAdminState": 0,
+                "winAuthTenantState": 0,
+                "customAppPoolIdentityAdminState": false,
+                "customAppPoolIdentityTenantState": false,
+                "loadBalancing": "LeastRequests",
+                "routingRules": [],
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "vnetName": "",
+                "siteAuthEnabled": false,
+                "siteAuthSettings": {
+                    "enabled": null,
+                    "unauthenticatedClientAction": null,
+                    "tokenStoreEnabled": null,
+                    "allowedExternalRedirectUrls": null,
+                    "defaultProvider": null,
+                    "clientId": null,
+                    "clientSecret": null,
+                    "clientSecretCertificateThumbprint": null,
+                    "issuer": null,
+                    "allowedAudiences": null,
+                    "additionalLoginParams": null,
+                    "isAadAutoProvisioned": false,
+                    "googleClientId": null,
+                    "googleClientSecret": null,
+                    "googleOAuthScopes": null,
+                    "facebookAppId": null,
+                    "facebookAppSecret": null,
+                    "facebookOAuthScopes": null,
+                    "twitterConsumerKmyproject": null,
+                    "twitterConsumerSecret": null,
+                    "microsoftAccountClientId": null,
+                    "microsoftAccountClientSecret": null,
+                    "microsoftAccountOAuthScopes": null
+                },
+                "cors": {
+                    "allowedOrigins": [],
+                    "supportCredentials": true
+                },
+                "localMySqlEnabled": false,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "ftpsState": "AllAllowed",
+                "reservedInstanceCount": 0,
+                "fileChangeAuditEnabled": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_lab_myproject_name'), '/101564759284320')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "101564759284320",
+                "status": 4,
+                "author": "Gaspar Salbucci Pafumi",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"718f96bd3ba4a595c1b339b2567194756c4dc10c\",\"buildId\":\"32\",\"releaseId\":\"10\",\"buildNumber\":\"20190802.11\",\"releaseName\":\"Release-10\",\"repoProvider\":\"TfsGit\",\"repoName\":\"MyFirstProject\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"slotName\":\"production\"}",
+                "start_time": "2019-08-02T15:21:24.5007265Z",
+                "end_time": "2019-08-02T15:21:24.5007265Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_lab_myproject_name'), '/111564768650854')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "111564768650854",
+                "status": 4,
+                "author": "Gaspar Salbucci Pafumi",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"1fe1503e6da1db56b34531ffbb9b69f7d49f49be\",\"buildId\":\"39\",\"releaseId\":\"11\",\"buildNumber\":\"20190802.18\",\"releaseName\":\"Release-11\",\"repoProvider\":\"TfsGit\",\"repoName\":\"MyFirstProject\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"slotName\":\"production\"}",
+                "start_time": "2019-08-02T17:57:31.0768519Z",
+                "end_time": "2019-08-02T17:57:31.0768519Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_lab_myproject_name'), '/121564769851060')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "121564769851060",
+                "status": 4,
+                "author": "Gaspar Salbucci Pafumi",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"1fe1503e6da1db56b34531ffbb9b69f7d49f49be\",\"buildId\":\"41\",\"releaseId\":\"12\",\"buildNumber\":\"20190802.20\",\"releaseName\":\"Release-12\",\"repoProvider\":\"TfsGit\",\"repoName\":\"MyFirstProject\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"slotName\":\"production\"}",
+                "start_time": "2019-08-02T18:17:31.2495335Z",
+                "end_time": "2019-08-02T18:17:31.2495335Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_lab_myproject_name'), '/1564684015618')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "1564684015618",
+                "status": 4,
+                "author": "VSTSRM",
+                "deployer": "VSTSRM",
+                "message": "{\"type\":\"Sync\",\"prodAppName\":\"lab-myproject\",\"buildId\":\"1\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"message\":\"\"}",
+                "start_time": "2019-08-01T18:26:56.8465533Z",
+                "end_time": "2019-08-01T18:26:56.8465533Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_lab_myproject_name'), '/1565269841229')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "1565269841229",
+                "status": 4,
+                "author": "VSTSRM",
+                "deployer": "VSTSRM",
+                "message": "{\"type\":\"Sync\",\"prodAppName\":\"lab-myproject\",\"buildId\":\"5\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"message\":\"\"}",
+                "start_time": "2019-08-08T13:10:43.3958025Z",
+                "end_time": "2019-08-08T13:10:43.3958025Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_lab_myproject_name'), '/211565198769100')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "211565198769100",
+                "status": 4,
+                "author": "Gaspar Salbucci Pafumi",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"79e7c7e1da7fc113bdda6a67ac1ffadd26b92417\",\"buildId\":\"60\",\"releaseId\":\"21\",\"buildNumber\":\"20190807.2\",\"releaseName\":\"Release-1\",\"repoProvider\":\"TfsGit\",\"repoName\":\"Back-lab-myproject\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"slotName\":\"production\"}",
+                "start_time": "2019-08-07T17:26:11.7124847Z",
+                "end_time": "2019-08-07T17:26:11.7124847Z",
+                "active": true
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/501565377386468')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "501565377386468",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"4662a754e3ec4796955e27dfcf354c4b27070235\",\"buildId\":\"86\",\"releaseId\":\"50\",\"buildNumber\":\"20190809.4\",\"releaseName\":\"Release-9\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"slotName\":\"production\"}",
+                "start_time": "2019-08-09T19:03:06.6451431Z",
+                "end_time": "2019-08-09T19:03:06.6451431Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/511565378322497')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "511565378322497",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"f29bcba5ac2145d77c851cbfcd93836d60dac624\",\"buildId\":\"87\",\"releaseId\":\"51\",\"buildNumber\":\"20190809.5\",\"releaseName\":\"Release-10\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"slotName\":\"production\"}",
+                "start_time": "2019-08-09T19:18:42.5663045Z",
+                "end_time": "2019-08-09T19:18:42.5663045Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/521565379405979')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "521565379405979",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"1653425df5f5e4d8732b5f8a375f763c328f332c\",\"buildId\":\"88\",\"releaseId\":\"52\",\"buildNumber\":\"20190809.6\",\"releaseName\":\"Release-11\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"slotName\":\"production\"}",
+                "start_time": "2019-08-09T19:36:47.1316189Z",
+                "end_time": "2019-08-09T19:36:47.1316189Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/541565615579535')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "541565615579535",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"649645b4e8efed02c5dad5114c658eeeb7906666\",\"buildId\":\"90\",\"releaseId\":\"54\",\"buildNumber\":\"20190812.1\",\"releaseName\":\"Release-12\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"slotName\":\"production\"}",
+                "start_time": "2019-08-12T13:12:59.9074675Z",
+                "end_time": "2019-08-12T13:12:59.9074675Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/651565636549278')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "651565636549278",
+                "status": 4,
+                "author": "David Mengarelli",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"0d0342442d6f1a58556c279342fe325a5081d1c7\",\"buildId\":\"99\",\"releaseId\":\"65\",\"buildNumber\":\"20190812.3\",\"releaseName\":\"Release-15\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"develop\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"production\"}",
+                "start_time": "2019-08-12T19:02:30.2372897Z",
+                "end_time": "2019-08-12T19:02:30.2372897Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/671565640917398')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "671565640917398",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"b2228ce3c52b98cfcaa87ba9585bb399a4562008\",\"buildId\":\"101\",\"releaseId\":\"67\",\"buildNumber\":\"20190812.4\",\"releaseName\":\"Release-16\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"develop\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"production\"}",
+                "start_time": "2019-08-12T20:15:18.8875257Z",
+                "end_time": "2019-08-12T20:15:18.8875257Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/681565642434413')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "681565642434413",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"81c2fa24d37f41fa70ed0a2026aa5d023684c945\",\"buildId\":\"102\",\"releaseId\":\"68\",\"buildNumber\":\"20190812.5\",\"releaseName\":\"Release-17\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"develop\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"production\"}",
+                "start_time": "2019-08-12T20:40:34.5068531Z",
+                "end_time": "2019-08-12T20:40:34.5068531Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/701565700748149')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "701565700748149",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"6b03eace506a57ca5a56afdd897195fc7941da41\",\"buildId\":\"104\",\"releaseId\":\"70\",\"buildNumber\":\"20190813.1\",\"releaseName\":\"Release-18\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"develop\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"production\"}",
+                "start_time": "2019-08-13T12:52:31.6017469Z",
+                "end_time": "2019-08-13T12:52:31.6017469Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_lab_myproject_name'), '/74a62875-cd46-4e90-bd81-1a5b2b19ec0f')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "74a62875-cd46-4e90-bd81-1a5b2b19ec0f",
+                "status": 4,
+                "author": "VSTS",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"CDDeploymentConfiguration\",\"message\":\"Successfully set up continuous delivery and triggered deployment to Azure Web App.\",\"VSTSRM_BuildDefinitionWebAccessUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca/_build?_a=simple-process&definitionId=7\",\"VSTSRM_ConfiguredCDEndPoint\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca/_apps/hub/ms.vss-releaseManagement-web.hub-explorer?definitionId=3\",\"VSTSRM_BuildWebAccessUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca/_build?_a=summary&buildId=64\"}",
+                "start_time": "2019-08-08T13:15:58.5135246Z",
+                "end_time": "2019-08-08T13:15:58.5135246Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/801565711859958')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "801565711859958",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"2721609f3ee54a57f5c67e5726197e08e207703f\",\"buildId\":\"115\",\"releaseId\":\"80\",\"buildNumber\":\"20190813.2\",\"releaseName\":\"Release-19\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"develop\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"production\"}",
+                "start_time": "2019-08-13T15:57:40.5252034Z",
+                "end_time": "2019-08-13T15:57:40.5252034Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_lab_myproject_name'), '/81564757431611')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "81564757431611",
+                "status": 4,
+                "author": "Gaspar Salbucci Pafumi",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"076808275f0fdbff799b9483bad5d2612f3a311f\",\"buildId\":\"30\",\"releaseId\":\"8\",\"buildNumber\":\"20190802.9\",\"releaseName\":\"Release-8\",\"repoProvider\":\"TfsGit\",\"repoName\":\"MyFirstProject\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"slotName\":\"production\"}",
+                "start_time": "2019-08-02T14:50:32.9361945Z",
+                "end_time": "2019-08-02T14:50:32.9361945Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_lab_myproject_name'), '/91564758092234')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "91564758092234",
+                "status": 4,
+                "author": "Gaspar Salbucci Pafumi",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"df40c19de2f81588f9f5e433b60dfefc2344738a\",\"buildId\":\"31\",\"releaseId\":\"9\",\"buildNumber\":\"20190802.10\",\"releaseName\":\"Release-9\",\"repoProvider\":\"TfsGit\",\"repoName\":\"MyFirstProject\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"slotName\":\"production\"}",
+                "start_time": "2019-08-02T15:01:32.4546096Z",
+                "end_time": "2019-08-02T15:01:32.4546096Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/931565723170950')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "931565723170950",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"f565d13d4cd8bc56a034a589702a522caa0b8e92\",\"buildId\":\"126\",\"releaseId\":\"93\",\"buildNumber\":\"20190813.3\",\"releaseName\":\"Release-20\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"master\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"production\"}",
+                "start_time": "2019-08-13T19:06:12.0383311Z",
+                "end_time": "2019-08-13T19:06:12.0383311Z",
+                "active": true
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_lab_myproject_name'), '/be6f09b8-eb14-4ede-b9f7-81edee141b9a')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "be6f09b8-eb14-4ede-b9f7-81edee141b9a",
+                "status": 4,
+                "author": "VSTS",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"CDDeploymentConfiguration\",\"message\":\"Successfully set up continuous delivery and triggered deployment to Azure Web App.\",\"VSTSRM_BuildDefinitionWebAccessUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca/_build?_a=simple-process&definitionId=1\",\"VSTSRM_ConfiguredCDEndPoint\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca/_apps/hub/ms.vss-releaseManagement-web.hub-explorer?definitionId=1\",\"VSTSRM_BuildWebAccessUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca/_build?_a=summary&buildId=1\"}",
+                "start_time": "2019-08-01T18:25:29.2009043Z",
+                "end_time": "2019-08-01T18:25:29.2009043Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/', parameters('sites_back_lab_myproject_name'), '.azurewebsites.net')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "siteName": "back-lab-myproject",
+                "hostNameType": "Verified"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_lab_myproject_name'), '/', parameters('sites_lab_myproject_name'), '.azurewebsites.net')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "siteName": "lab-myproject",
+                "hostNameType": "Verified"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Dev')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]",
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_apirest_name'))]"
+            ],
+            "tags": {
+                "Technology": "Backend",
+                "Environment": "Development"
+            },
+            "kind": "app",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "back-lab-myproject-dev.azurewebsites.net",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "back-lab-myproject-dev.scm.azurewebsites.net",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_apirest_name'))]",
+                "reserved": false,
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": true,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_lab_myproject_name'), '/Dev')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lab_myproject_name'))]",
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_apirest_name'))]"
+            ],
+            "tags": {
+                "Environment": "Development",
+                "Technology": "Frontend"
+            },
+            "kind": "app",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "lab-myproject-dev.azurewebsites.net",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "lab-myproject-dev.scm.azurewebsites.net",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_apirest_name'))]",
+                "reserved": false,
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": true,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Staging')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]",
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_apirest_name'))]"
+            ],
+            "tags": {
+                "Technology": "Backend",
+                "Environment": "Staging"
+            },
+            "kind": "app",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "back-lab-myproject-staging.azurewebsites.net",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "back-lab-myproject-staging.scm.azurewebsites.net",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_apirest_name'))]",
+                "reserved": false,
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": true,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_lab_myproject_name'), '/Staging')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lab_myproject_name'))]",
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_apirest_name'))]"
+            ],
+            "tags": {
+                "Environment": "Staging",
+                "Technology": "Frontend"
+            },
+            "kind": "app",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "lab-myproject-staging.azurewebsites.net",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "lab-myproject-staging.scm.azurewebsites.net",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_apirest_name'))]",
+                "reserved": false,
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": true,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/config",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Dev/web')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Dev')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "tags": {
+                "Technology": "Backend",
+                "Environment": "Development"
+            },
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php",
+                    "hostingstart.html"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "phpVersion": "5.6",
+                "pythonVersion": "",
+                "nodeVersion": "",
+                "linuxFxVersion": "",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "remoteDebuggingVersion": "VS2017",
+                "httpLoggingEnabled": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$back-lab-myproject__Dev",
+                "scmType": "VSTSRM",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": true,
+                "appCommandLine": "",
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": true,
+                        "virtualDirectories": null
+                    }
+                ],
+                "winAuthAdminState": 0,
+                "winAuthTenantState": 0,
+                "customAppPoolIdentityAdminState": false,
+                "customAppPoolIdentityTenantState": false,
+                "loadBalancing": "LeastRequests",
+                "routingRules": [],
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "vnetName": "",
+                "siteAuthEnabled": false,
+                "siteAuthSettings": {
+                    "enabled": null,
+                    "unauthenticatedClientAction": null,
+                    "tokenStoreEnabled": null,
+                    "allowedExternalRedirectUrls": null,
+                    "defaultProvider": null,
+                    "clientId": null,
+                    "clientSecret": null,
+                    "clientSecretCertificateThumbprint": null,
+                    "issuer": null,
+                    "allowedAudiences": null,
+                    "additionalLoginParams": null,
+                    "isAadAutoProvisioned": false,
+                    "googleClientId": null,
+                    "googleClientSecret": null,
+                    "googleOAuthScopes": null,
+                    "facebookAppId": null,
+                    "facebookAppSecret": null,
+                    "facebookOAuthScopes": null,
+                    "twitterConsumerKmyproject": null,
+                    "twitterConsumerSecret": null,
+                    "microsoftAccountClientId": null,
+                    "microsoftAccountClientSecret": null,
+                    "microsoftAccountOAuthScopes": null
+                },
+                "cors": {
+                    "allowedOrigins": [],
+                    "supportCredentials": false
+                },
+                "localMySqlEnabled": false,
+                "ipSecurityRestrictions": [
+                    {
+                        "ipAddress": "201.234.41.0",
+                        "subnetMask": "255.255.255.0",
+                        "name": "Allow GLBT Public IP access",
+                        "description": "Allow GLBT Public IP access"
+                    }
+                ],
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "ftpsState": "AllAllowed",
+                "reservedInstanceCount": 0,
+                "fileChangeAuditEnabled": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/config",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Staging/web')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Staging')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "tags": {
+                "Technology": "Backend",
+                "Environment": "Staging"
+            },
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php",
+                    "hostingstart.html"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "phpVersion": "5.6",
+                "pythonVersion": "",
+                "nodeVersion": "",
+                "linuxFxVersion": "",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "remoteDebuggingVersion": "VS2017",
+                "httpLoggingEnabled": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$back-lab-myproject__Staging",
+                "scmType": "VSTSRM",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": true,
+                "appCommandLine": "",
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": true,
+                        "virtualDirectories": null
+                    }
+                ],
+                "winAuthAdminState": 0,
+                "winAuthTenantState": 0,
+                "customAppPoolIdentityAdminState": false,
+                "customAppPoolIdentityTenantState": false,
+                "loadBalancing": "LeastRequests",
+                "routingRules": [],
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "vnetName": "",
+                "siteAuthEnabled": false,
+                "siteAuthSettings": {
+                    "enabled": null,
+                    "unauthenticatedClientAction": null,
+                    "tokenStoreEnabled": null,
+                    "allowedExternalRedirectUrls": null,
+                    "defaultProvider": null,
+                    "clientId": null,
+                    "clientSecret": null,
+                    "clientSecretCertificateThumbprint": null,
+                    "issuer": null,
+                    "allowedAudiences": null,
+                    "additionalLoginParams": null,
+                    "isAadAutoProvisioned": false,
+                    "googleClientId": null,
+                    "googleClientSecret": null,
+                    "googleOAuthScopes": null,
+                    "facebookAppId": null,
+                    "facebookAppSecret": null,
+                    "facebookOAuthScopes": null,
+                    "twitterConsumerKmyproject": null,
+                    "twitterConsumerSecret": null,
+                    "microsoftAccountClientId": null,
+                    "microsoftAccountClientSecret": null,
+                    "microsoftAccountOAuthScopes": null
+                },
+                "cors": {
+                    "allowedOrigins": [],
+                    "supportCredentials": false
+                },
+                "localMySqlEnabled": false,
+                "ipSecurityRestrictions": [
+                    {
+                        "ipAddress": "201.234.41.0",
+                        "subnetMask": "255.255.255.0",
+                        "name": "Allow GLBT Public IP access",
+                        "description": "Allow GLBT Public IP access"
+                    }
+                ],
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "ftpsState": "AllAllowed",
+                "reservedInstanceCount": 0,
+                "fileChangeAuditEnabled": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/config",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_lab_myproject_name'), '/Dev/web')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_lab_myproject_name'), 'Dev')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lab_myproject_name'))]"
+            ],
+            "tags": {
+                "Environment": "Development",
+                "Technology": "Frontend"
+            },
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php",
+                    "hostingstart.html"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "phpVersion": "5.6",
+                "pythonVersion": "",
+                "nodeVersion": "8.5.0",
+                "linuxFxVersion": "",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "remoteDebuggingVersion": "VS2017",
+                "httpLoggingEnabled": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$lab-myproject__Dev",
+                "scmType": "None",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": true,
+                "appCommandLine": "",
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": true,
+                        "virtualDirectories": null
+                    }
+                ],
+                "winAuthAdminState": 0,
+                "winAuthTenantState": 0,
+                "customAppPoolIdentityAdminState": false,
+                "customAppPoolIdentityTenantState": false,
+                "loadBalancing": "LeastRequests",
+                "routingRules": [],
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "vnetName": "",
+                "siteAuthEnabled": false,
+                "siteAuthSettings": {
+                    "enabled": null,
+                    "unauthenticatedClientAction": null,
+                    "tokenStoreEnabled": null,
+                    "allowedExternalRedirectUrls": null,
+                    "defaultProvider": null,
+                    "clientId": null,
+                    "clientSecret": null,
+                    "clientSecretCertificateThumbprint": null,
+                    "issuer": null,
+                    "allowedAudiences": null,
+                    "additionalLoginParams": null,
+                    "isAadAutoProvisioned": false,
+                    "googleClientId": null,
+                    "googleClientSecret": null,
+                    "googleOAuthScopes": null,
+                    "facebookAppId": null,
+                    "facebookAppSecret": null,
+                    "facebookOAuthScopes": null,
+                    "twitterConsumerKmyproject": null,
+                    "twitterConsumerSecret": null,
+                    "microsoftAccountClientId": null,
+                    "microsoftAccountClientSecret": null,
+                    "microsoftAccountOAuthScopes": null
+                },
+                "cors": {
+                    "allowedOrigins": [],
+                    "supportCredentials": true
+                },
+                "localMySqlEnabled": false,
+                "ipSecurityRestrictions": [
+                    {
+                        "ipAddress": "201.234.41.0",
+                        "subnetMask": "255.255.255.0",
+                        "name": "Allow GLBT Public IP access",
+                        "description": "Allow GLBT Public IP access"
+                    }
+                ],
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "ftpsState": "AllAllowed",
+                "reservedInstanceCount": 0,
+                "fileChangeAuditEnabled": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/config",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_lab_myproject_name'), '/Staging/web')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_lab_myproject_name'), 'Staging')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lab_myproject_name'))]"
+            ],
+            "tags": {
+                "Environment": "Staging",
+                "Technology": "Frontend"
+            },
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php",
+                    "hostingstart.html"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "phpVersion": "5.6",
+                "pythonVersion": "",
+                "nodeVersion": "8.5.0",
+                "linuxFxVersion": "",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "remoteDebuggingVersion": "VS2017",
+                "httpLoggingEnabled": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$lab-myproject__Staging",
+                "scmType": "None",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": true,
+                "appCommandLine": "",
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": true,
+                        "virtualDirectories": null
+                    }
+                ],
+                "winAuthAdminState": 0,
+                "winAuthTenantState": 0,
+                "customAppPoolIdentityAdminState": false,
+                "customAppPoolIdentityTenantState": false,
+                "loadBalancing": "LeastRequests",
+                "routingRules": [],
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "vnetName": "",
+                "siteAuthEnabled": false,
+                "siteAuthSettings": {
+                    "enabled": null,
+                    "unauthenticatedClientAction": null,
+                    "tokenStoreEnabled": null,
+                    "allowedExternalRedirectUrls": null,
+                    "defaultProvider": null,
+                    "clientId": null,
+                    "clientSecret": null,
+                    "clientSecretCertificateThumbprint": null,
+                    "issuer": null,
+                    "allowedAudiences": null,
+                    "additionalLoginParams": null,
+                    "isAadAutoProvisioned": false,
+                    "googleClientId": null,
+                    "googleClientSecret": null,
+                    "googleOAuthScopes": null,
+                    "facebookAppId": null,
+                    "facebookAppSecret": null,
+                    "facebookOAuthScopes": null,
+                    "twitterConsumerKmyproject": null,
+                    "twitterConsumerSecret": null,
+                    "microsoftAccountClientId": null,
+                    "microsoftAccountClientSecret": null,
+                    "microsoftAccountOAuthScopes": null
+                },
+                "cors": {
+                    "allowedOrigins": [],
+                    "supportCredentials": true
+                },
+                "localMySqlEnabled": false,
+                "ipSecurityRestrictions": [
+                    {
+                        "ipAddress": "201.234.41.0",
+                        "subnetMask": "255.255.255.0",
+                        "name": "Allow GLBT Public IP access",
+                        "description": "Allow GLBT Public IP access"
+                    }
+                ],
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "ftpsState": "AllAllowed",
+                "reservedInstanceCount": 0,
+                "fileChangeAuditEnabled": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Dev/1001565808090946')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Dev')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "1001565808090946",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"6294577b251e899dd8669a3aedc36c3bb0766759\",\"buildId\":\"132\",\"releaseId\":\"100\",\"buildNumber\":\"20190814.2\",\"releaseName\":\"Release-7\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"develop\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"Dev\"}",
+                "start_time": "2019-08-14T18:41:31.5877242Z",
+                "end_time": "2019-08-14T18:41:31.5877242Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Dev/1051566226311736')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Dev')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "1051566226311736",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"b319ac751868253792c89fb90cc217f385d5cd14\",\"buildId\":\"158\",\"releaseId\":\"105\",\"buildNumber\":\"20190819.3\",\"releaseName\":\"Release-8\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"develop\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"Dev\"}",
+                "start_time": "2019-08-19T14:51:52.5579566Z",
+                "end_time": "2019-08-19T14:51:52.5579566Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Dev/1061566241853985')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Dev')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "1061566241853985",
+                "status": 4,
+                "author": "Microsoft.VisualStudio.Services.TFS",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"3f6d14df614fa619af38177202f493e07bdf6514\",\"buildId\":\"162\",\"releaseId\":\"106\",\"buildNumber\":\"20190819.4\",\"releaseName\":\"Release-9\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"develop\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"Dev\"}",
+                "start_time": "2019-08-19T19:10:54.279126Z",
+                "end_time": "2019-08-19T19:10:54.279126Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Dev/1081566309267782')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Dev')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "1081566309267782",
+                "status": 4,
+                "author": "David Mengarelli",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"3f6d14df614fa619af38177202f493e07bdf6514\",\"buildId\":\"177\",\"releaseId\":\"108\",\"buildNumber\":\"20190820.7\",\"releaseName\":\"Release-2\",\"repoProvider\":\"GitHubEnterprise\",\"repoName\":\"\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"develop\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"Dev\"}",
+                "start_time": "2019-08-20T13:54:29.231839Z",
+                "end_time": "2019-08-20T13:54:29.231839Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Dev/1101566315993967')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Dev')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "1101566315993967",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"af6ffe7c7f8779470834e1663ea6d33ab7aa8c00\",\"buildId\":\"179\",\"releaseId\":\"110\",\"buildNumber\":\"20190820.1\",\"releaseName\":\"Release-10\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"develop\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"Dev\"}",
+                "start_time": "2019-08-20T15:46:34.694251Z",
+                "end_time": "2019-08-20T15:46:34.694251Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Dev/1111566320974895')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Dev')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "1111566320974895",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"88f30a6031e5ab7760b25f64e8aadb1974a7df09\",\"buildId\":\"182\",\"releaseId\":\"111\",\"buildNumber\":\"20190820.2\",\"releaseName\":\"Release-11\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"develop\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"Dev\"}",
+                "start_time": "2019-08-20T17:09:35.2912268Z",
+                "end_time": "2019-08-20T17:09:35.2912268Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Staging/1121566321469507')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Staging')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "1121566321469507",
+                "status": 4,
+                "author": "David Mengarelli",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"88f30a6031e5ab7760b25f64e8aadb1974a7df09\",\"buildId\":\"184\",\"releaseId\":\"112\",\"buildNumber\":\"20190820.1\",\"releaseName\":\"Release-1\",\"repoProvider\":\"GitHubEnterprise\",\"repoName\":\"\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"stage\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"Staging\"}",
+                "start_time": "2019-08-20T17:17:50.3969706Z",
+                "end_time": "2019-08-20T17:17:50.3969706Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Staging/1141566325661926')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Staging')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "1141566325661926",
+                "status": 4,
+                "author": "David Mengarelli",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"88f30a6031e5ab7760b25f64e8aadb1974a7df09\",\"buildId\":\"187\",\"releaseId\":\"114\",\"buildNumber\":\"20190820.2\",\"releaseName\":\"Release-7\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"stage\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"Staging\"}",
+                "start_time": "2019-08-20T18:27:43.3442027Z",
+                "end_time": "2019-08-20T18:27:43.3442027Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Staging/1151566326564480')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Staging')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "1151566326564480",
+                "status": 4,
+                "author": "David Mengarelli",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"88f30a6031e5ab7760b25f64e8aadb1974a7df09\",\"buildId\":\"188\",\"releaseId\":\"115\",\"buildNumber\":\"20190820.3\",\"releaseName\":\"Release-8\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"stage\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"Staging\"}",
+                "start_time": "2019-08-20T18:42:44.6030965Z",
+                "end_time": "2019-08-20T18:42:44.6030965Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Dev/1171566332252852')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Dev')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "1171566332252852",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"a3e92d50089c7e80f63b391c62e41d10d8a58095\",\"buildId\":\"191\",\"releaseId\":\"117\",\"buildNumber\":\"20190820.4\",\"releaseName\":\"Release-12\",\"repoProvider\":\"GitHubEnterprise\",\"repoName\":\"\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"refactorCrud\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"Dev\"}",
+                "start_time": "2019-08-20T20:17:33.6277495Z",
+                "end_time": "2019-08-20T20:17:33.6277495Z",
+                "active": true
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Staging/1181566390951337')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Staging')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "1181566390951337",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"88f30a6031e5ab7760b25f64e8aadb1974a7df09\",\"buildId\":\"192\",\"releaseId\":\"118\",\"buildNumber\":\"20190821.1\",\"releaseName\":\"Release-9\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"stage\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"Staging\"}",
+                "start_time": "2019-08-21T12:35:52.7336981Z",
+                "end_time": "2019-08-21T12:35:52.7336981Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Staging/1191566391912509')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Staging')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "1191566391912509",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"88f30a6031e5ab7760b25f64e8aadb1974a7df09\",\"buildId\":\"194\",\"releaseId\":\"119\",\"buildNumber\":\"20190821.2\",\"releaseName\":\"Release-10\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"stage\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"Staging\"}",
+                "start_time": "2019-08-21T12:51:52.6521698Z",
+                "end_time": "2019-08-21T12:51:52.6521698Z",
+                "active": true
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Staging/661565640875172')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Staging')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "661565640875172",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"f1e876f3615c1bf8baee40ed3a339e5bd4c60aa8\",\"buildId\":\"100\",\"releaseId\":\"66\",\"buildNumber\":\"20190812.3\",\"releaseName\":\"Release-2\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"stage\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"Staging\"}",
+                "start_time": "2019-08-12T20:14:36.4128698Z",
+                "end_time": "2019-08-12T20:14:36.4128698Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Staging/711565700789002')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Staging')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "711565700789002",
+                "status": 4,
+                "author": "David Mengarelli",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"f1e876f3615c1bf8baee40ed3a339e5bd4c60aa8\",\"buildId\":\"105\",\"releaseId\":\"71\",\"buildNumber\":\"20190813.1\",\"releaseName\":\"Release-3\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"stage\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"Staging\"}",
+                "start_time": "2019-08-13T12:53:10.4157503Z",
+                "end_time": "2019-08-13T12:53:10.4157503Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Staging/731565710335879')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Staging')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "731565710335879",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"6b03eace506a57ca5a56afdd897195fc7941da41\",\"buildId\":\"108\",\"releaseId\":\"73\",\"buildNumber\":\"20190813.2\",\"releaseName\":\"Release-4\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"stage\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"Staging\"}",
+                "start_time": "2019-08-13T15:32:16.4208471Z",
+                "end_time": "2019-08-13T15:32:16.4208471Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Staging/781565711747394')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Staging')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "781565711747394",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"2721609f3ee54a57f5c67e5726197e08e207703f\",\"buildId\":\"114\",\"releaseId\":\"78\",\"buildNumber\":\"20190813.3\",\"releaseName\":\"Release-5\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"stage\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"Staging\"}",
+                "start_time": "2019-08-13T15:55:47.4718064Z",
+                "end_time": "2019-08-13T15:55:47.4718064Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Dev/901565721554369')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Dev')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "901565721554369",
+                "status": 4,
+                "author": "Microsoft.VisualStudio.Services.TFS",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"1da4ea5ec45041a6b441cfe6f716f661465da0a9\",\"buildId\":\"123\",\"releaseId\":\"90\",\"buildNumber\":\"20190813.3\",\"releaseName\":\"Release-4\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"develop\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"Dev\"}",
+                "start_time": "2019-08-13T18:39:14.4539163Z",
+                "end_time": "2019-08-13T18:39:14.4539163Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Dev/911565723060751')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Dev')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "911565723060751",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"f565d13d4cd8bc56a034a589702a522caa0b8e92\",\"buildId\":\"124\",\"releaseId\":\"91\",\"buildNumber\":\"20190813.4\",\"releaseName\":\"Release-5\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"develop\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"Dev\"}",
+                "start_time": "2019-08-13T19:04:20.8811942Z",
+                "end_time": "2019-08-13T19:04:20.8811942Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Staging/921565723115810')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Staging')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "921565723115810",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"f565d13d4cd8bc56a034a589702a522caa0b8e92\",\"buildId\":\"125\",\"releaseId\":\"92\",\"buildNumber\":\"20190813.4\",\"releaseName\":\"Release-6\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"stage\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"Staging\"}",
+                "start_time": "2019-08-13T19:05:16.5494067Z",
+                "end_time": "2019-08-13T19:05:16.5494067Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Dev/951565796420992')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Dev')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "id": "951565796420992",
+                "status": 4,
+                "author": "Joaquin Garcia",
+                "deployer": "VSTS",
+                "message": "{\"type\":\"Deployment\",\"commitId\":\"a7fdd1ffe9f5fa3349576545dec9a16f2f51a648\",\"buildId\":\"127\",\"releaseId\":\"95\",\"buildNumber\":\"20190814.1\",\"releaseName\":\"Release-6\",\"repoProvider\":\"GitHubEnterprise\",\"collectionUrl\":\"https://dev.azure.com/lab-myproject/\",\"teamProject\":\"c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"buildProjectUrl\":\"https://dev.azure.com/lab-myproject/c64ab68c-dc9c-4fef-a3a9-5d545c433bca\",\"repositoryUrl\":\"\",\"branch\":\"develop\",\"teamProjectName\":\"Lab-myproject\",\"slotName\":\"Dev\"}",
+                "start_time": "2019-08-14T15:27:01.231986Z",
+                "end_time": "2019-08-14T15:27:01.231986Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/hostNameBindings",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Dev/', parameters('sites_back_lab_myproject_name'), '-dev.azurewebsites.net')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Dev')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "siteName": "back-lab-myproject(Dev)",
+                "hostNameType": "Verified"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/hostNameBindings",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_back_lab_myproject_name'), '/Staging/', parameters('sites_back_lab_myproject_name'), '-staging.azurewebsites.net')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_back_lab_myproject_name'), 'Staging')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_back_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "siteName": "back-lab-myproject(Staging)",
+                "hostNameType": "Verified"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/hostNameBindings",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_lab_myproject_name'), '/Dev/', parameters('sites_lab_myproject_name'), '-dev.azurewebsites.net')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_lab_myproject_name'), 'Dev')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "siteName": "lab-myproject(Dev)",
+                "hostNameType": "Verified"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/hostNameBindings",
+            "apiVersion": "2016-08-01",
+            "name": "[concat(parameters('sites_lab_myproject_name'), '/Staging/', parameters('sites_lab_myproject_name'), '-staging.azurewebsites.net')]",
+            "location": "Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_lab_myproject_name'), 'Staging')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lab_myproject_name'))]"
+            ],
+            "properties": {
+                "siteName": "lab-myproject(Staging)",
+                "hostNameType": "Verified"
+            }
+        }
+    ]
+}
